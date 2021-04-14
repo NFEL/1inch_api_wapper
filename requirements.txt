@@ -40,3 +40,4 @@ uvicorn==0.13.4
 varint==1.0.2
 web3==5.17.0
 websockets==8.1
+SQLAlchemy==0.6.0
