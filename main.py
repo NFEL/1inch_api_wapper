@@ -1,10 +1,9 @@
-import json
 import requests
 import typing
 
 
 from fastapi.encoders import jsonable_encoder
-from fastapi import FastAPI,Depends,Response, responses
+from fastapi import FastAPI,Depends, responses
 from pydantic import BaseModel
 from web3 import Web3
 
@@ -29,7 +28,8 @@ app = FastAPI(
     description="A Simple Api for finding good paths between two token swaps (/path) and create a non singed transaction which can then be signed via a wallet singer (meamask , web3 <- private key , ...) ",
     version="1.1",
     docs_url=None,
-    redoc_url="/doc",
+    redoc_url="/api/v1.1/doc"
+    
 )
 
 
@@ -44,15 +44,9 @@ def get_db():
 _DB = Depends(get_db)
 
 
-# @app.post("/log/")
-def create_log(log:schemas.LogSchema , db:Session = _DB):
-    log_obj = models.Log(data = log.data)
-    db.add(log_obj)
-    db.commit()
-    db.refresh(log_obj)
-    return log_obj
 
-@app.get("/log/")
+
+@app.get("/api/v1.1/log")
 def get_log(db:Session = _DB):
     return db.query(models.Log).all()
 
@@ -93,7 +87,6 @@ on server start up populates memory with tokens availabe
 async def sync_tokens():
     try:
         res = requests.get("https://api.1inch.exchange/v3.0/56/tokens")
-        # print(len(res.json()['tokens']))
         if res.status_code == 200:
             global tokens
             tokens = res.json().get('tokens',None)
@@ -106,7 +99,7 @@ async def sync_tokens():
         
         
         
-@app.post("/swap")
+@app.post("/api/v1.1/swap")
 async def swap(item: Item):
     """
     Swap method :
@@ -146,7 +139,7 @@ async def swap(item: Item):
         return res
     
     
-@app.post("/path")
+@app.post("/api/v1.1/path")
 async def path(item: Item):
     """
     path method :
@@ -184,15 +177,15 @@ async def path(item: Item):
 @app.get("/toturial-metamask")
 async def sign_with_metamsak():
     """
-    Visit <a href="http://localhost:8000/toturial-metamask">Here</a>
+    Visit <a href="http://localhost:8000/toturial-metamask">Here</a> for a step by step guide on meta mask singer method
     """
     with open("Singing with meta mask.html" , "r") as f:
         return responses.HTMLResponse(f.read())
     
 @app.get("/toturial-nodejs")
-async def sign_with_metamsak():
+async def sign_with_nodejs():
     """
-    Visit <a href="http://localhost:8000/toturial-nodejs">Here</a>
+    Visit <a href="http://localhost:8000/toturial-nodejs">Here</a> for a step by step guide on node js (ethers lib) singer method
     """
     with open("Singing with nodejs.html" , "r") as f:
         return responses.HTMLResponse(f.read())
